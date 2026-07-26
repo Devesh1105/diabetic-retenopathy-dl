@@ -7,6 +7,10 @@ https://universe.roboflow.com/drproject/diabetic-retenopathy
 
 Due to limited computational resources, three different model variations were trained using different preprocessing and augmentation strategies, and the best-performing model was selected based on validation performance.
 
+Model Architecture - 
+<img width="1536" height="1024" alt="dl_archotecture" src="https://github.com/user-attachments/assets/6bd2ee21-de51-4dba-9edf-ca91c98aba3b" />
+
+
 The proposed framework utilizes an Attention U-Net architecture with a ResNet50 encoder for robust feature extraction. To address the severe class imbalance commonly present in DR datasets, focal loss was employed to emphasize hard-to-classify samples. In addition, class-specific data augmentation was applied using the Albumentations library, with stronger transformations for underrepresented classes such as Severe and Proliferative DR.
 
 Images were resized to 224×224 pixels and normalized before training. 
