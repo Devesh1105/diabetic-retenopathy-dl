@@ -1,0 +1,20 @@
+# Runtime dependencies. For an editable install that also puts `dr` on the
+# import path, use `pip install -e .` instead of this file.
+#
+# Version bounds matter here:
+#   - TensorFlow < 2.16 keeps Keras 2, which is what ImageDataGenerator and
+#     tf.keras.utils.Sequence need. Keras 3 removed both.
+#   - Keras 2 requires numpy < 2.
+#   - albumentations 2.x renamed most transform arguments used in
+#     dr/data/augmentation.py.
+tensorflow>=2.12,<2.16
+numpy>=1.23,<2
+pandas>=1.5
+scikit-learn>=1.2
+matplotlib>=3.6
+seaborn>=0.12
+pillow>=9.3
+opencv-python>=4.7
+albumentations>=1.4,<2.0
+pyyaml>=6.0
+tqdm>=4.64

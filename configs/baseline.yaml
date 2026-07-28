@@ -1,0 +1,43 @@
+# Baseline run (notebooks/03_train_baseline_aug.ipynb).
+# Focal loss, but only mild uniform Keras augmentation.
+name: baseline
+description: >
+  Attention U-Net (ResNet50 encoder) with focal loss and light uniform
+  augmentation via ImageDataGenerator. Reference point for the augmentation
+  experiments.
+
+paths:
+  dataset: data/processed
+  models: outputs/baseline/models
+  results: outputs/baseline/results
+
+data:
+  img_size: 224
+  batch_size: 8
+  num_classes: 5
+  seed: 42
+  use_augmentation: true
+  augmentation_backend: keras
+  keras_augmentation:
+    rotation_range: 15
+    width_shift_range: 0.1
+    height_shift_range: 0.1
+    zoom_range: 0.1
+    brightness_range: [0.8, 1.2]
+    horizontal_flip: true
+    vertical_flip: false
+
+model:
+  encoder_name: resnet50
+  pretrained_encoder: true
+  dropout_rate: 0.5
+
+training:
+  num_epochs: 13
+  learning_rate: 0.0001
+  early_stopping_patience: 5
+  reduce_lr_patience: 5
+  use_class_weights: true
+  use_focal_loss: true
+  focal_alpha: 0.25
+  focal_gamma: 2.0
