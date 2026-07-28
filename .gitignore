@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Testing / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Data and run artefacts (large, not source).
+# Anchored with a leading slash so they only match at the repository root -
+# an unanchored "data/" would also swallow src/dr/data/.
+/data/
+/outputs/
+*.h5
+*.keras
+*.weights
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

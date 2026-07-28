@@ -1,0 +1,39 @@
+# Best-performing run (notebooks/02_train_class_specific_aug.ipynb).
+# Focal loss + class weights, with Albumentations applying an intensive
+# pipeline to the minority severity grades and a moderate one to the rest.
+name: class_specific_aug
+description: >
+  Attention U-Net (ResNet50 encoder) trained with focal loss and
+  class-specific Albumentations augmentation. Reported test performance:
+  78.54% accuracy, 67.85% balanced accuracy, Cohen's kappa 0.6797.
+
+paths:
+  # Override on the command line with --dataset, or export DR_DATASET_PATH.
+  dataset: data/processed
+  models: outputs/class_specific_aug/models
+  results: outputs/class_specific_aug/results
+
+data:
+  img_size: 224
+  batch_size: 16
+  num_classes: 5
+  seed: 42
+  use_augmentation: true
+  augmentation_backend: albumentations
+  use_class_specific_aug: true
+  minority_threshold_ratio: 0.7
+
+model:
+  encoder_name: resnet50
+  pretrained_encoder: true
+  dropout_rate: 0.5
+
+training:
+  num_epochs: 30
+  learning_rate: 0.0001
+  early_stopping_patience: 5
+  reduce_lr_patience: 5
+  use_class_weights: true
+  use_focal_loss: true
+  focal_alpha: 0.25
+  focal_gamma: 2.0

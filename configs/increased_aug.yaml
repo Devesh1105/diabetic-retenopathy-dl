@@ -1,0 +1,43 @@
+# Increased-augmentation run (notebooks/04_train_increased_aug.ipynb).
+# Stronger uniform Keras augmentation, cross-entropy instead of focal loss.
+name: increased_aug
+description: >
+  Attention U-Net (ResNet50 encoder) with stronger uniform augmentation and
+  weighted categorical cross-entropy. Isolates the effect of augmentation
+  strength from the choice of loss function.
+
+paths:
+  dataset: data/processed
+  models: outputs/increased_aug/models
+  results: outputs/increased_aug/results
+
+data:
+  img_size: 224
+  batch_size: 8
+  num_classes: 5
+  seed: 42
+  use_augmentation: true
+  augmentation_backend: keras
+  keras_augmentation:
+    rotation_range: 30
+    width_shift_range: 0.2
+    height_shift_range: 0.2
+    shear_range: 0.2
+    zoom_range: 0.2
+    brightness_range: [0.5, 1.5]
+    channel_shift_range: 20.0
+    horizontal_flip: true
+    vertical_flip: true
+
+model:
+  encoder_name: resnet50
+  pretrained_encoder: true
+  dropout_rate: 0.5
+
+training:
+  num_epochs: 13
+  learning_rate: 0.0001
+  early_stopping_patience: 5
+  reduce_lr_patience: 5
+  use_class_weights: true
+  use_focal_loss: false
