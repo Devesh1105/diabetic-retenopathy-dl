@@ -7,7 +7,10 @@ name = "diabetic-retinopathy-dl"
 version = "0.1.0"
 description = "Attention U-Net for diabetic retinopathy severity classification"
 readme = "README.md"
-requires-python = ">=3.9"
+# TensorFlow < 2.16 (see below) publishes no wheels for Python 3.12+, so the
+# upper bound here is what that pin implies. Without it, installing on 3.12
+# fails with an opaque resolver error instead of a clear version message.
+requires-python = ">=3.9,<3.12"
 # See requirements.txt for why the upper bounds are needed.
 dependencies = [
     "tensorflow>=2.12,<2.16",

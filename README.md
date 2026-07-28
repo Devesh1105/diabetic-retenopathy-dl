@@ -70,16 +70,33 @@ tests/              Unit and smoke tests
 
 ## Setup
 
+**Python 3.9, 3.10 or 3.11 is required** — not 3.12+. TensorFlow is pinned
+below 2.16 (see below) and there are no TF wheels for 3.12 under that pin.
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e .
+python3.11 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
 ```
 
-The version bounds in `requirements.txt` are load-bearing: the pipeline uses
-Keras 2 APIs (`ImageDataGenerator`, `tf.keras.utils.Sequence`) that Keras 3
-removed, so TensorFlow is pinned below 2.16, which in turn pins numpy below 2.
+Then confirm the install without needing the dataset:
+
+```bash
+pytest
+```
+
+The tests build small synthetic datasets on the fly, so a green run means
+TensorFlow, Albumentations, the generators and the model all work on your
+machine.
+
+The version bounds are load-bearing, not caution: the pipeline uses Keras 2
+APIs (`ImageDataGenerator`, `tf.keras.utils.Sequence`) that Keras 3 removed,
+so TensorFlow is pinned below 2.16, which in turn pins numpy below 2.
 Albumentations is pinned below 2.0 because 2.x renamed most transform
 arguments.
+
+On a headless machine (a server, WSL, or Docker), swap `opencv-python` for
+`opencv-python-headless` to avoid pulling in GUI libraries.
 
 ## Usage
 
