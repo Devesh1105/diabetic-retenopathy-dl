@@ -16,7 +16,7 @@ Dataset: [Roboflow Universe - diabetic-retenopathy](https://universe.roboflow.co
 The encoder is a pretrained ResNet50. The decoder is the standard U-Net path
 with **additive attention gates** on every skip connection, so background
 regions are suppressed before the skip is merged. The final feature map passes
-through a **CBAM** block, global average pooling and a dense classifier.
+through a **CBAM** block, global average pooling and a dense classifier
 
 The dataset is heavily imbalanced, so two things are done about it:
 
