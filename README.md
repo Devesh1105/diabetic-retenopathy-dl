@@ -1,7 +1,8 @@
 # Diabetic Retinopathy Detection
 
 Automated classification of diabetic retinopathy (DR) severity from retinal
-fundus images, using an Attention U-Net with a ResNet50 encoder.
+fundus images, using an Attention U-Net with a ResNet50 encoder, compared
+against a CNN trained from scratch and a Vision Transformer (ViT-B/16).
 
 Diabetic retinopathy is one of the leading causes of preventable blindness.
 Early detection substantially reduces vision loss, but manual screening of
@@ -52,12 +53,70 @@ Per-run numbers, confusion matrices and ROC curves are written to the run's
 results directory; the original notebook outputs are preserved in
 `notebooks/`.
 
+## Model comparison: Attention U-Net vs CNN vs ViT
+
+The Attention U-Net (class-specific aug run above) was compared with two other
+model families on the **identical stratified test set** (2,544 images, seed 42,
+per-class counts 241 / 661 / 1300 / 204 / 138):
+
+- **CNN from scratch**: 10 conv layers (5 stages of 2x Conv3x3-BN-ReLU + MaxPool,
+  32 to 512 channels) with a GAP + MLP head, random init, 4.8M params.
+- **ViT-B/16**: Vision Transformer pretrained on ImageNet-1k, fine-tuned end to
+  end with a new 5-class head, 85.8M params.
+
+Both use the same class-weighted focal loss (alpha 0.25, gamma 2), early stopping
+on validation loss and ReduceLROnPlateau as the U-Net. They were trained in
+PyTorch 2.11 (CUDA 12.8, FP16) on an RTX 5070 Ti Laptop GPU with GPU-side
+augmentation (rotation, shift, zoom, flips, brightness/contrast).
+
+| Model | Accuracy | Balanced accuracy | Macro-F1 | Cohen's kappa | Params | Epochs / train time |
+|---|---|---|---|---|---|---|
+| Attention U-Net (ResNet50) | 78.54% | 67.85% | 0.640 | 0.680 | 74.8M | 28 / 114 min |
+| CNN from scratch | 71.78% | 61.76% | 0.551 | 0.585 | 4.8M | 40 / 58 min |
+| **ViT-B/16** | **87.85%** | **81.59%** | **0.795** | **0.816** | 85.8M | 15 / 17 min |
+
+![Headline metrics](reports/model_comparison/metrics_bar.png)
+![Per-class recall and F1](reports/model_comparison/per_class.png)
+
+- **ViT-B/16 is best by a clear margin.** Global self-attention combines lesions
+  spread across the whole retina, and the gains are largest on the minority
+  grades (recall: Moderate 0.77 vs 0.55 for the U-Net, Proliferate_DR 0.85 vs
+  0.60, Severe 0.73 vs 0.59).
+- **CNN vs ViT is statistically significant**: McNemar test, 503 images correct
+  only for ViT vs 94 only for the CNN (p < 0.001); bootstrap 95% CIs of balanced
+  accuracy are 0.59-0.64 (CNN) and 0.79-0.84 (ViT).
+- **Pretraining matters**: the from-scratch CNN learns No_DR well but only gets
+  30% of Moderate images right.
+- **Moderate** is the hardest grade for all three models; No_DR is easy for all
+  (recall about 0.97).
+
+Note: the U-Net numbers come from its original TensorFlow run; the CNN and ViT
+use the same data split but a different framework, machine and augmentation
+pipeline.
+
+Notebooks (in `notebooks/model_comparison/`, outputs included):
+
+| Notebook | What it does |
+|---|---|
+| `00_setup_envs_and_data.ipynb` | Creates the `dr-torch` environment (PyTorch CUDA 12.8), unzips the Roboflow export and recreates the 75/10/15 split at 224x224 |
+| `02_cnn_from_scratch.ipynb` | Trains and evaluates the CNN |
+| `03_vit_b16.ipynb` | Fine-tunes and evaluates ViT-B/16 |
+| `04_model_comparison.ipynb` | Loads all three results and produces the tables, charts, McNemar test and bootstrap CIs |
+| `common.py` | Shared PyTorch pipeline: in-RAM data loading, GPU augmentation, focal loss, training loop, metrics |
+
+The Attention U-Net counterpart is `notebooks/02_train_class_specific_aug.ipynb`.
+The notebooks use absolute Windows paths (`DATASET_PATH`, `OUT_DIR` in the first
+code cell); edit them for your machine. Results and figures are in
+`reports/model_comparison/`.
+
 ## Repository layout
 
 ```
 configs/            One YAML per experiment - the full description of a run
 notebooks/          Original experiment notebooks, with their outputs intact
+  model_comparison/   CNN and ViT notebooks, shared common.py, comparison notebook
 reports/figures/    Dataset EDA and quality figures
+reports/model_comparison/  Comparison results (JSON/CSV) and figures
 scripts/            Command-line entry points
 src/dr/             The library
   config.py           Config dataclasses loaded from configs/*.yaml
@@ -188,6 +247,6 @@ of the same pipeline; new work should go there.
 ## Future work
 
 - Close the accuracy / balanced-accuracy gap on the minority grades
-- Ensemble the three variants
+- Ensemble the ViT and the Attention U-Net
 - Explainability (attention map and Grad-CAM overlays) for clinical review
 - Real-time deployment for telemedicine screening
